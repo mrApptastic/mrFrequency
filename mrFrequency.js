@@ -37,7 +37,7 @@ var mrFrequency = function () {
 	];
 	mrF.selected = mrF.standards[0];
 	mrF.getAnalysis = function (text, allCharacters) {
-		var result = JSON.parse(JSON.stringify(mrF.selected.Letters)); //new Array();
+		var result = JSON.parse(JSON.stringify(mrF.selected.Letters));
 	
 		if (!Array.isArray(text)) {
 			text = new Array(text)
@@ -51,45 +51,100 @@ var mrFrequency = function () {
 					let c = result.find(x => x.Character.toUpperCase() === bigChar);
 					c.Count++;
 				}
-				/*
-				else {
-					let theCode = bigChar.charCodeAt(0);
-					// || theCode === 197 || theCode === 198 || theCode === 216
-					if (!allCharacters || (theCode >= 65 && theCode <= 90)) {
-						result.push(
-							{ 
-								"Character" : bigChar, 
-								"Count" : 1,
-								"Code" : theCode
-							}
-						);
-					}
-				}
-				*/
 			}
 		}
-		console.log(result);
 		return result;
 	};
-	mrF.encodeText = function (text, caesar) {
+	mrF.encodeText = function (text, caesar) {		
+		function getCryptList (charList, caesar) {
+			let oldArr = new Array().concat(charList);
+			let newArr = new Array();
 		
-		var charList = mrF.selected.Letters.map(x => x.Character);
-		var cryptList = function (charList, caesar) {
 			if (typeof caesar === "number") {
-				return charList;
+				let diff = caesar;
+
+				while (diff > 0) {
+					oldArr.push(oldArr.splice(0, 1)[0]);
+					diff--;
+				}
+
+				while (diff < 0) {
+					oldArr.unshift(oldArr.splice(oldArr.length - 1, 1)[0]);
+					diff++;
+				}
+
+				newArr = newArr.concat(oldArr);
 			}
 			else {
-				return charList;
+				while (newArr.length < charList.length) {
+					let rand = Math.floor(Math.random() * oldArr.length);
+					let letter = oldArr[rand];
+					if (newArr.indexOf(letter) === -1) {
+						oldArr.splice(rand, 1);
+						newArr.push(letter);
+					}
+				}
 			}
-		};
+
+			return newArr;
+		}
+
+		var charList = mrF.selected.Letters.map(x => x.Character);
+		var cryptList = getCryptList(charList, caesar);
+		var newText = new Array();
 		
 		for (let i = 0; i < text.length; i++) {
-			
+			let index = charList.findIndex(x => x === text[i].toUpperCase());
+
+			if (index > -1) {
+				newText.push(cryptList[index]);
+			}
 		}
+
+		return newText.join("");
 
 	};
 	mrF.decodeText = function (text) {
-	
+		var oldText = new Array();
+		var charArray = new Array();
+
+		for (let i = 0; i < text.length; i++) {
+			let upperCase = text[i].toUpperCase();
+			let theCode = upperCase.charCodeAt(0);
+
+			if ((theCode >= 65 && theCode <= 90) || theCode === 197 || theCode === 198 || theCode === 216) {
+				let index = charArray.findIndex(x => x.Character === upperCase);
+				if (index > -1) {
+					charArray[index].Count++;
+				}
+				else {
+					charArray.push(
+						{ 
+							"Character" : upperCase, 
+							"Count" : 1,
+							"Code" : theCode
+						}
+					);
+				}
+			}
+		}
+
+		var languageChars = mrF.selected.Letters.sort(function(x, y) {
+			return y.Frequency - x.Frequency;
+		});
+
+		var textChars = charArray.sort(function(x, y) {
+			return x.Count - y.Count;
+		});
+
+		for (let i = 0; i < text.length; i++) {
+			let index = textChars.findIndex(x => x.Character === text[i].toUpperCase());
+			if (index > -1) {
+				oldText.push(languageChars[index].Character);
+			}
+		}
+
+		return oldText.join("");
 	};
 
 };
