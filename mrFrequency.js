@@ -36,7 +36,7 @@ var mrFrequency = function () {
 		}
 	];
 	mrF.selected = mrF.standards[0];
-	mrF.getAnalysis = function (text, allCharacters) {
+	mrF.getAnalysis = function (text) {
 		var result = JSON.parse(JSON.stringify(mrF.selected.Letters));
 	
 		if (!Array.isArray(text)) {
@@ -106,30 +106,9 @@ var mrFrequency = function () {
 	};
 	mrF.decodeText = function (text) {
 		var oldText = new Array();
-		var charArray = new Array();
+		var charArray = mrF.getAnalysis(text);
 
-		for (let i = 0; i < text.length; i++) {
-			let upperCase = text[i].toUpperCase();
-			let theCode = upperCase.charCodeAt(0);
-
-			if ((theCode >= 65 && theCode <= 90) || theCode === 197 || theCode === 198 || theCode === 216) {
-				let index = charArray.findIndex(x => x.Character === upperCase);
-				if (index > -1) {
-					charArray[index].Count++;
-				}
-				else {
-					charArray.push(
-						{ 
-							"Character" : upperCase, 
-							"Count" : 1,
-							"Code" : theCode
-						}
-					);
-				}
-			}
-		}
-
-		var languageChars = mrF.selected.Letters.sort(function(x, y) {
+		var languageChars = charArray.sort(function(x, y) {
 			return y.Frequency - x.Frequency;
 		});
 
