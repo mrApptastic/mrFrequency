@@ -1,7 +1,6 @@
 var mrFrequency = function () {
 	var mrF = this;
-	mrF.charObject = { "Character" : null, "Code" : 0, "Count" : 0 };
-	mrF.stdObject = { "Name" : null, "Letters"  : new Array() };
+	/* Language Standards */
 	mrF.standards = [
 		{ 
 			Name : "English",
@@ -35,10 +34,13 @@ var mrFrequency = function () {
 			]
 		}
 	];
-	mrF.selected = mrF.standards[0];
-	mrF.getAnalysis = function (text) {
-		var result = JSON.parse(JSON.stringify(mrF.selected.Letters));
-	
+	/* Set first standard as selected */
+	mrF.selectedStandard = mrF.standards[0];
+	/* Main method for receiving a frequency analysis based on selected standard */
+	mrF.getFrequencyAnalysis = function (text) {
+		var result = JSON.parse(JSON.stringify(mrF.selectedStandard.Letters));
+		
+		/* Convert text string to array of chars */
 		if (!Array.isArray(text)) {
 			text = new Array(text)
 		}
@@ -47,6 +49,7 @@ var mrFrequency = function () {
 			for (let i = 0; i < t.length; i++) {
 				let ch = t.charAt(i);
 				let bigChar = ch.toUpperCase();
+				/* Increment count if character exists within the selected standard */
 				if (result.some(x => x.Character.toUpperCase() === bigChar)) {
 					let c = result.find(x => x.Character.toUpperCase() === bigChar);
 					c.Count++;
@@ -55,6 +58,9 @@ var mrFrequency = function () {
 		}
 		return result;
 	};
+	/* Main method for encoding a text. 
+	   If the caesar param is set to a number 'Caesar's Cipher' will be used. 
+	   Otherwise the substitution will be random */
 	mrF.encodeText = function (text, caesar) {		
 		function getCryptList (charList, caesar) {
 			let oldArr = new Array().concat(charList);
@@ -89,7 +95,7 @@ var mrFrequency = function () {
 			return newArr;
 		}
 
-		var charList = mrF.selected.Letters.map(x => x.Character);
+		var charList = mrF.selectedStandard.Letters.map(x => x.Character);
 		var cryptList = getCryptList(charList, caesar);
 		var newText = new Array();
 		
@@ -104,9 +110,11 @@ var mrFrequency = function () {
 		return newText.join("");
 
 	};
+	/* Decode a text which supposedly has been encrypted using substitution. 
+	   Works best with huge text bases :-) */
 	mrF.decodeText = function (text) {
 		var oldText = new Array();
-		var charArray = mrF.getAnalysis(text);
+		var charArray = mrF.getFrequencyAnalysis(text);
 
 		var languageChars = charArray.sort(function(x, y) {
 			return y.Frequency - x.Frequency;
