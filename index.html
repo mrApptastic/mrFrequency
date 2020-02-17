@@ -86,7 +86,7 @@
 		};
 		
 		function drawIb (text) {
-			var freq = ib.getAnalysis(text, true).sort(function(x, y) {
+			var freq = ib.getFrequencyAnalysis(text, true).sort(function(x, y) {
 					if (x.Character < y.Character) { 
 						return -1; 
 					}
